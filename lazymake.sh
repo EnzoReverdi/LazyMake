@@ -54,7 +54,7 @@ printf "\n" >> Makefile
 
 printf "OBJ\t=\t" >> Makefile
 echo "\$(SRC:.c=.o)" >> Makefile
-printf "\n\n" >> Makefile
+printf "\n" >> Makefile
 
 ## print the all func
 
@@ -62,7 +62,21 @@ printf "############################################################\n" >> Makef
 printf "########################## Func ############################\n" >> Makefile
 printf "############################################################\n\n" >> Makefile
 
+printf ".PHONY:\tall clean fclean re\n\n" >> Makefile
 printf "all:\t\$(SOFTNAME)\n\n" >> Makefile
+
+printf ".c.o:\n\t@gcc \$(CCFLAGS) -c  $< -o \$@ \$(LINKHEADER) \$(LINKLIB)\n\n" >> Makefile
+
 printf "\$(SOFTNAME):\t\$(OBJ)\n" >> Makefile
-printf "\tgcc \$(CCFLAGS) -o \$(SOFTNAME) \$(OBJ) \$(LINKHEADER) \$(LINKLIB)\n" >> Makefile
-printf "\tmake -C lib/my\n" >> Makefile
+printf "\t@make -C lib/my\n" >> Makefile
+printf "\t@gcc \$(CCFLAGS) -o \$(SOFTNAME) \$(OBJ) \$(LINKHEADER) \$(LINKLIB)\n\n" >> Makefile
+
+printf "clean:\n" >> Makefile
+printf "\t@make clean -C lib/my\n" >> Makefile
+printf "\t@rm -rf \$(OBJ)\n\n" >> Makefile
+
+printf "fclean:\tclean\n" >> Makefile
+printf "\t@make fclean -C lib/my\n" >> Makefile
+printf "\t@rm -rf \$(SOFTNAME)\n\n" >> Makefile
+
+printf "re:\tfclean all\n" >> Makefile
