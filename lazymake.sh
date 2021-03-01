@@ -43,7 +43,7 @@ printf "${bin_line}\n\n" >> Makefile
 
 printf "${lib_line}\n\n" >> Makefile
 
-printf "LINKHEADER\t=\t-I./include\n\n" >> Makefile
+printf "LINKHEADER\t=\t-I./inc\n\n" >> Makefile
 
 printf "${ccflags}\n\n" >> Makefile
 
@@ -89,15 +89,15 @@ printf "all:\t\$(SOFTNAME)\n\n" >> Makefile
 printf ".c.o:\n\t@gcc \$(CCFLAGS) -c  $< -o \$@ \$(LINKHEADER) \$(LINKLIB)\n\n" >> Makefile
 
 printf "\$(SOFTNAME):\t\$(OBJ)\n" >> Makefile
-printf "\t@make -C lib/my\n" >> Makefile
+printf "\t@make -s -C lib/my\n" >> Makefile
 printf "\t@gcc \$(CCFLAGS) -o \$(SOFTNAME) \$(OBJ) \$(LINKHEADER) \$(LINKLIB)\n\n" >> Makefile
 
 printf "clean:\n" >> Makefile
-printf "\t@make clean -C lib/my\n" >> Makefile
+printf "\t@make clean -s -C lib/my\n" >> Makefile
 printf "\t@rm -rf \$(OBJ)\n\n" >> Makefile
 
 printf "fclean:\tclean\n" >> Makefile
-printf "\t@make fclean -C lib/my\n" >> Makefile
+printf "\t@make fclean -s -C lib/my\n" >> Makefile
 printf "\t@rm -rf \$(SOFTNAME) *.gcno *.gcda unit_tests\n\n" >> Makefile
 
 ####### unit test part ###

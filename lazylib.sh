@@ -15,7 +15,7 @@ printf "MAKEFLAGS\t+=\t--no-print-directory\n\n" >> Makefile
 
 printf "LIBNAME\t=\tlibmy.a\n\n" >> Makefile
 
-printf "LINKHEADER\t=\t-I../../include\n\n" >> Makefile
+printf "LINKHEADER\t=\t-I../../inc\n\n" >> Makefile
 
 printf "CCFLAGS\t=\t-g3 -fno-builtin\n\n" >> Makefile
 
