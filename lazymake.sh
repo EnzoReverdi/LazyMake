@@ -86,7 +86,7 @@ printf "############################################################\n\n" >> Mak
 printf ".PHONY:\tall clean fclean re\n\n" >> Makefile
 printf "all:\t\$(SOFTNAME)\n\n" >> Makefile
 
-printf ".c.o:\n\t@gcc \$(CCFLAGS) -c  $< -o \$@ \$(LINKHEADER) \$(LINKLIB)\n\n" >> Makefile
+printf ".c.o:\n\t@gcc \$(CCFLAGS) -c  $< -o \$@ \$(LINKHEADER)\n\n" >> Makefile
 
 printf "\$(SOFTNAME):\t\$(OBJ)\n" >> Makefile
 printf "\t@make -s -C lib/my\n" >> Makefile
