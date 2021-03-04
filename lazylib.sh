@@ -5,7 +5,7 @@ max_len=0
 idx=0
 nb_space=0
 
-printf "##\n## EPITECH PROJECT, 2021\n## "my" lib\n## File description:\n## Makefile used to build the "my" lib\n##\n\n##" > Makefile
+printf "##\n## EPITECH PROJECT, 2021\n## "my" lib\n## File description:\n## Makefile used to build the "my" lib\n##\n\n" > Makefile
 
 printf "############################################################\n" >> Makefile
 printf "########################## Flags ###########################\n" >> Makefile
