@@ -12,7 +12,16 @@
 #                                                                                    #
 #  By Enzo REVERDI || RACLERIE 2.0™ Powered                                          #
 ######################################################################################
-
+ #$#																			  #$#
+ #$#																			  #$#
+ #$#            																  #$#
+ #$#																			  #$#
+ #$#																			  #$#
+ #$#																			  #$#
+ #$#            																  #$#
+ #$#																			  #$#
+ #$#            																  #$#
+ #$#																			  #$#
 ######################################################################################
 #                  ____  ____  ____  ____  ____  ____  ____  ____                    #
 #                 ||V ||||a ||||r ||||i ||||a ||||b ||||l ||||e ||                   #
@@ -93,6 +102,8 @@ NB_SPACE=0
 
 CSFML_OR_NCURSES=${1}
 
+YEAR=$(date +'%Y')
+
 ######################################################################################
 #                  ____  ____  ____  ____  ____  ____  ____  ____                    #
 #                 ||F ||||u ||||n ||||c ||||t ||||i ||||o ||||n ||                   #
@@ -102,6 +113,13 @@ CSFML_OR_NCURSES=${1}
 ######################################################################################
 
 main() {
+	if [[ $ACTUAL_DIR = $LIBRARY ]]; then
+		create_main_lib_makefile()
+		exit 0;
+	else
+		check_major_folders()
+	fi
+
 
 }
 
@@ -113,12 +131,12 @@ check_major_folders() {
 		res=$(( res + 1))
 	fi
 
-	local buffer="ls | grep ${LIBRARY}"
+	buffer="ls | grep ${LIBRARY}"
 	if [[ $buffer = $LIBRARY ]]; then
 		res=$(( res + 1))
 	fi
 
-	local buffer="ls | grep ${INCLUDE}"
+	buffer="ls | grep ${INCLUDE}"
 	if [[ $buffer = $INCLUDE ]]; then
 		res=$(( res + 1))
 	fi
@@ -128,21 +146,95 @@ check_major_folders() {
 	fi
 
 	if [[ $res -eq 0 -a ${INIT_IF_EMPTY} -eq 1 ]]; then
-		init_repo()
-		exit 0
+		while true; do
+			read -p "Do you wish to init this repo ? [Y/n]" yn
+			case $yn in
+				[Yy]* ) init_repo();;
+				[Nn]* ) exit 0;;
+				* ) echo "Please answer [y/n]";;
+			esac
+		done
 	fi
 
 	printf "ERROR: Failed to locate one of the following directory, ${SOURCES}, \
-	${LIBRARY}, ${INCLUDE}"
+	${LIBRARY}, ${INCLUDE}\n"
 	exit 1
 }
 
 init_repo() {
-	mkdir ${SOURCES} ${LIBRARY} ${INCLUDE} tests
-	cd ${LIBRARY}
+	mkdir ${SOURCES} tests
 	cp -rf ${PATH_TO_TEMPLATE}/* .
+	cd ${LIBRARY}
+	create_main_lib_makefile()
 	cd -1
+	exit 0
 }
 
+create_main_lib_makefile() {
+	printf "##\n## EPITECH PROJECT, ${YEAR}\n## ${LIBRARY}\n## File description:\n\
+	## Makefile used to build all the lib contained here\n##\n\n" > Makefile
+	print_flags_banner()
+	print_makeflags()
+
+	reset_before_find()
+	for FIND_BUFFERS in $(find . -type d -maxdepth 1 ); 
+	do
+
+		$FIND_BUFFERS+="/Makefile"
+		LEN=$((${#FIND_BUFFERS} + 2))
+		if [[ $LEN -gt $MAX_LEN ]]
+		then
+			MAX_LEN=$LEN
+		fi
+	done
+
+	for FIND_BUFFERS in $(find . -type d -maxdepth 1 ); 
+	do
+		LEN=${#FIND_BUFFERS}
+		NB_SPACE=$((${MAX_LEN} - ${LEN}))
+		if [[ $IDX -eq 0 ]]
+		then
+			printf "   $FIND_BUFFERS% *s" ${NB_SPACE} "\\" >> Makefile
+		else
+			printf "\t\t$FIND_BUFFERS% *s" ${NB_SPACE} "\\" >> Makefile
+		fi
+		printf "\n" >> Makefile
+		IDX=$((${IDX} + 1))
+	done
+
+	print_func_banner()
+}
+
+print_flags_banner() {
+	printf "############################################################\n" >> Makefile
+	printf "########################## Flags ###########################\n" >> Makefile
+	printf "############################################################\n\n" >> Makefile
+}
+
+print_func_banner() {
+	printf "############################################################\n" >> Makefile
+	printf "########################## Func ############################\n" >> Makefile
+	printf "############################################################\n\n" >> Makefile
+}
+
+print_color_banner() {
+	printf "############################################################\n" >> Makefile
+	printf "########################## Colors ##########################\n" >> Makefile
+	printf "############################################################\n\n" >> Makefile
+}
+
+print_makeflags() {
+	if [[ $SILENCED -eq 0]]; then
+		printf "# " >> Makefile
+	printf "MAKEFLAGS\t+=\t--no-print-directory -s\n\n" >> Makefile
+}
+
+reset_before_find() {
+	LEN=0
+	FIND_BUFFERS=""
+	MAX_LEN=0
+	IDX=0
+	NB_SPACE=0
+}
 
 main "$@"
