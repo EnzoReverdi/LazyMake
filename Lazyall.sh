@@ -67,12 +67,12 @@ CCFLAGS="-g3 -fno-builtin"
 # If you want to save some performance, you can set this to 1, it will not regenerate
 # automaticly a makefile for the lib each time you call Lazymake. You will need to go
 # in your lib directory and call Lazymake to update your differents lib's Makefile
-# PERF=0
+PERF=0
 
 ### !!DISCLAIMER!! ##################################################################
 # Do not set this to 1 on a project you want to bring on a review, You will get a -42
 # it's here only to make your my.epitech.eu pretty
-# "Vrai hommmme ne dyt ri1 au pet dagose"
+# "Vrai homme dit rien au pedagos"
 #######      ########################      ##################     ###################
 # if set to 1,
 # Will create a tests folder if there is not one already, and put a criterion test in
@@ -120,8 +120,87 @@ main() {
 	else
 		check_major_folders
 	fi
+	create_main_makefile
 
+}
 
+create_main_makefile() {
+	local check_makefile=$(ls | grep Makefile)
+	local lib_line="LINKLIB\t=\t${LIB_ARG}"
+	local bin_line="SOFTNAME\t=\tbin"
+	local cflags="CCFLAGS\t=\t${CCFLAGS}"
+
+	# if [[ $check_makefile = "Makefile"  ]]
+	# then
+	# 	lib_line=$(sed -n 16p Makefile)
+	# 	bin_line=$(sed -n 14p Makefile)
+	# 	cflags=$(sed -n 20p Makefile)
+	# fi
+
+	if [[ $CSFML_OR_NCURSES -eq 1 ]]; then
+    lib_line="LINKLIB\t=\t${LIB_ARG} -lcsfml-graphics -lcsfml-window -lcsfml-system"
+	fi
+	if [[ $CSFML_OR_NCURSES -eq 2 ]]; then
+    lib_line="LINKLIB\t=\t${LIB_ARG} -lncurses"
+	fi
+
+	printf "##\n## EPITECH PROJECT, ${YEAR}\n## ${ACTUAL_DIR}\n## File description:\n## \
+Makefile for the ${ACTUAL_DIR} project\n##\n\n" > Makefile
+	print_flags_banner
+	print_makeflags
+	printf "${bin_line}\n\n" >> Makefile
+	printf "${lib_line}\n\n" >> Makefile
+	printf "LINKHEADER\t=\t-I./${INCLUDE}\n\n" >> Makefile
+	printf "${cflags}\n\n" >> Makefile
+
+	printf "SRC\t=" >> Makefile
+	reset_before_find
+	for FIND_BUFFERS in $(find src -name '*.c' ); 
+	do
+		LEN=$((${#FIND_BUFFERS} + 2))
+		if [[ $LEN -gt $MAX_LEN ]]
+		then
+			MAX_LEN=$LEN
+		fi
+	done
+
+	for FIND_BUFFERS in $(find src -name '*.c' ); 
+	do
+		LEN=${#FIND_BUFFERS}
+		NB_SPACE=$((${MAX_LEN} - ${LEN}))
+		if [[ $IDX -eq 0 ]]
+		then
+			printf "   $FIND_BUFFERS% *s" ${NB_SPACE} "\\" >> Makefile
+		else
+			printf "\t\t$FIND_BUFFERS% *s" ${NB_SPACE} "\\" >> Makefile
+		fi
+		printf "\n" >> Makefile
+		IDX=$((${IDX} + 1))
+	done
+	printf "\n" >> Makefile
+
+	printf "OBJ\t=\t\$(SRC:.c=.o)\n\n" >> Makefile
+
+	print_func_banner
+
+	printf ".PHONY:\tall clean fclean re\n\n" >> Makefile
+	printf "all:\t\$(SOFTNAME)\n\n" >> Makefile
+
+	printf ".c.o:\n\tgcc \$(CCFLAGS) -c  $< -o \$@ \$(LINKHEADER)\n\n" >> Makefile
+
+	printf "\$(SOFTNAME):\t\$(OBJ)\n" >> Makefile
+	printf "\tmake -C ${LIBRARY}\n" >> Makefile
+	printf "\tgcc \$(CCFLAGS) -o \$(SOFTNAME) \$(OBJ) \$(LINKHEADER) \$(LINKLIB)\n\n" >> Makefile
+
+	printf "clean:\n" >> Makefile
+	printf "\tmake clean -C ${LIBRARY}\n" >> Makefile
+	printf "\trm -rf \$(OBJ)\n\n" >> Makefile
+
+	printf "fclean:\tclean\n" >> Makefile
+	printf "\tmake fclean -C ${LIBRARY}\n" >> Makefile
+	printf "\trm -rf \$(SOFTNAME) *.gcno *.gcda unit_tests\n\n" >> Makefile
+
+	printf "re:\tfclean all" >> Makefile
 }
 
 check_major_folders() {
