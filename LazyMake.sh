@@ -51,6 +51,24 @@ SOURCES="src"
 # You need to specify it in the var PATH_TO_TEMPLATE, Your template folder should only
 # contain your libs , since it's gonna be copied to the lib folder.
 # Example: /home/enzoreverdi/Delivery/perso/Template
+# What you want your template folder to look like
+# .
+# ├── inc
+# │   └── my.h
+# └── lib
+#     └── my
+#         ├── my_getnbr.c
+#         ├── my_itoa.c
+#         ├── my_putchar.c
+#         ├── my_put_nbr.c
+#         ├── my_putstr.c
+#         ├── my_revstr.c
+#         ├── my_strcat.c
+#         ├── my_strcmp.c
+#         ├── my_strcpy.c
+#         ├── my_strlen.c
+#         ├── my_strncmp.c
+#         └── my_strncpy.c
 INIT_IF_EMPTY=0
 PATH_TO_TEMPLATE="/home/enzoreverdi/Delivery/perso/Template"
 
