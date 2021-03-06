@@ -32,7 +32,7 @@
 
 # Will make the output of your Makefile colored if set to 1, Base is 0.
 # If set to 1, I suggest you to set SILENCED to 1.
-# COLOR=0
+COLOR=0
 
 # Will silence all the line of your Makefile with a '@' before each line if set to 1,
 # Base is 0.
@@ -51,7 +51,7 @@ SOURCES="src"
 # You need to specify it in the var PATH_TO_TEMPLATE, Your template folder should only
 # contain your libs , since it's gonna be copied to the lib folder.
 # Example: /home/enzoreverdi/Delivery/perso/Template
-INIT_IF_EMPTY=1
+INIT_IF_EMPTY=0
 PATH_TO_TEMPLATE="/home/enzoreverdi/Delivery/perso/Template"
 
 # If you want to add another lib than "my" add it here.
@@ -81,7 +81,7 @@ PERF=0
 # green 100% test and coverage.
 # Your "my_strlen.c" need to contain only the my_strlen function
 # base is 0.
-# CHEAT=0
+CHEAT=0
 
 ######################################################################################
 ###### FROM THIS POINT DON'T TOUCH ANYTHING UNLESS YOU KNOW WHAT YOU ARE DOING ######
@@ -105,6 +105,8 @@ CSFML_OR_NCURSES=${1}
 
 YEAR=$(date +'%Y')
 
+IS_CHEATED=0
+
 ######################################################################################
 #                  ____  ____  ____  ____  ____  ____  ____  ____                    #
 #                 ||F ||||u ||||n ||||c ||||t ||||i ||||o ||||n ||                   #
@@ -121,7 +123,9 @@ main() {
 		check_major_folders
 	fi
 	create_main_makefile
-
+	if [[ $PERF -eq 0 ]]; then
+		cd ${LIBRARY} && create_main_lib_makefile && cd ..
+	fi
 }
 
 create_main_makefile() {
@@ -129,13 +133,26 @@ create_main_makefile() {
 	local lib_line="LINKLIB\t=\t${LIB_ARG}"
 	local bin_line="SOFTNAME\t=\tbin"
 	local cflags="CCFLAGS\t=\t${CCFLAGS}"
+	unit_tests_line="UNI\t=\t\$(filter-out src/main.c, \$(SRC)) tests/*.c \$(LINKLIB)"
 
-	# if [[ $check_makefile = "Makefile"  ]]
-	# then
-	# 	lib_line=$(sed -n 16p Makefile)
-	# 	bin_line=$(sed -n 14p Makefile)
-	# 	cflags=$(sed -n 20p Makefile)
-	# fi
+	if [[ $check_makefile = "Makefile"  ]]
+	then
+		lib_line=$(sed -n 16p Makefile)
+		bin_line=$(sed -n 14p Makefile)
+		cflags=$(sed -n 20p Makefile)
+		unit_tests_line=$(sed -n 24p Makefile)
+	else
+		if [[ $CHEAT -eq 1 ]]; then
+			while true; do
+				read -p "Do you wish to cheat the unit tests? [Y/n]" yn
+				case $yn in
+				[Yy]* )create_cheated_tests; break;;
+				[Nn]* ) break;;
+				* ) echo "Please answer [y/n]";;
+			esac
+		done
+		fi
+	fi
 
 	if [[ $CSFML_OR_NCURSES -eq 1 ]]; then
     lib_line="LINKLIB\t=\t${LIB_ARG} -lcsfml-graphics -lcsfml-window -lcsfml-system"
@@ -152,6 +169,8 @@ Makefile for the ${ACTUAL_DIR} project\n##\n\n" > Makefile
 	printf "${lib_line}\n\n" >> Makefile
 	printf "LINKHEADER\t=\t-I./${INCLUDE}\n\n" >> Makefile
 	printf "${cflags}\n\n" >> Makefile
+	printf "OBJ\t=\t\$(SRC:.c=.o)\n\n" >> Makefile
+	printf "${unit_tests_line}\n\n" >> Makefile
 
 	printf "SRC\t=" >> Makefile
 	reset_before_find
@@ -164,7 +183,7 @@ Makefile for the ${ACTUAL_DIR} project\n##\n\n" > Makefile
 		fi
 	done
 
-	for FIND_BUFFERS in $(find src -name '*.c' ); 
+	for FIND_BUFFERS in $( find src -name '*.c' ); 
 	do
 		LEN=${#FIND_BUFFERS}
 		NB_SPACE=$((${MAX_LEN} - ${LEN}))
@@ -177,9 +196,7 @@ Makefile for the ${ACTUAL_DIR} project\n##\n\n" > Makefile
 		printf "\n" >> Makefile
 		IDX=$((${IDX} + 1))
 	done
-	printf "\n" >> Makefile
-
-	printf "OBJ\t=\t\$(SRC:.c=.o)\n\n" >> Makefile
+	printf "\n\n" >> Makefile
 
 	print_func_banner
 
@@ -200,7 +217,17 @@ Makefile for the ${ACTUAL_DIR} project\n##\n\n" > Makefile
 	printf "\tmake fclean -C ${LIBRARY}\n" >> Makefile
 	printf "\trm -rf \$(SOFTNAME) *.gcno *.gcda unit_tests\n\n" >> Makefile
 
-	printf "re:\tfclean all" >> Makefile
+	printf "re:\tfclean all\n\n" >> Makefile
+
+	printf "unit_tests:\tre\n" >> Makefile
+	printf "\tgcc -o unit_tests \$(UNI) \$(LINKHEADER) --coverage -lcriterion\n" >> Makefile
+	printf "\t./unit_tests\n\n" >> Makefile
+
+	printf "tests_run:\tunit_tests\n\n" >> Makefile
+
+	printf "gcovr:\ttests_run\n" >> Makefile
+	printf "\tgcovr --exclude tests/\n" >> Makefile
+	printf "\tgcovr --exclude tests/ --branches\n" >> Makefile
 }
 
 check_major_folders() {
@@ -241,12 +268,21 @@ ${LIBRARY}, ${INCLUDE}\n"
 	exit 1
 }
 
+create_mainc() {
+	printf "/*\n** EPITECH PROJECT, ${YEAR}\n** Main\n** File description:\n** \
+Main for the ${ACTUAL_DIR} project\n*/\n\n" > main.c
+	printf "#include \"my.h\"\n\n" >> main.c
+	printf "int main(int ac, char **av)\n{\n\n}\n" >> main.c
+}
+
 init_repo() {
 	cp -r ${PATH_TO_TEMPLATE}/* .
 	local buffer=$(ls | grep ${LIBRARY})
 	if [[ $buffer = $LIBRARY ]]; then
 		mkdir ${SOURCES} tests
 		cd ${LIBRARY} && create_main_lib_makefile && cd ..
+		cd ${SOURCES} && create_mainc && cd ..
+		create_main_makefile
 		exit 0
 	else
 		printf "ERROR: Failed to locate one or two of the following directory, ${SOURCES}, \
@@ -302,17 +338,47 @@ create_main_lib_makefile() {
 	printf ".PHONY:	all clean fclean re\n\n" >> Makefile
 
 	printf "all:\n" >> Makefile
-	printf "\tmake -C \${SRC}\n\n" >> Makefile
+	printf "\tmake -C \$(SRC)\n\n" >> Makefile
 
 	printf "clean:\n" >> Makefile
-	printf "\tmake clean -C \${SRC}\n\n" >> Makefile
+	printf "\tmake clean -C \$(SRC)\n\n" >> Makefile
 
 	printf "fclean:\n" >> Makefile
-	printf "\tmake fclean -C \${SRC}\n\n" >> Makefile
+	printf "\tmake fclean -C \$(SRC)\n\n" >> Makefile
 
 	printf "re:\n" >> Makefile
-	printf "\tmake re -C \${SRC}\n" >> Makefile
+	printf "\tmake re -C \$(SRC)\n" >> Makefile
 }
+
+########## need to test this
+i_hope_you_will_not_get_busted() {
+	local name="${ACTUAL_DIR}_test.c"
+	printf "/*\n** EPITECH PROJECT, ${YEAR}\n** ${ACTUAL_DIR}\n** File description:\n** \
+Test for ${ACTUAL_DIR} project\n*/\n\n" > $name
+
+	printf "#include <criterion/criterion.h>\n" >> $name
+	printf "#include <criterion/redirect.h>\n" >> $name
+	printf "#include \"my.h\"\n\n" >> $name
+	printf "Test(${ACTUAL_DIR}, test_of_${ACTUAL_DIR})\n{\n" >> $name
+	printf "\tint i = my_strlen(\"Raclerie2.0\");\n" >> $name
+	printf "\tcr_assert(i - 11 == 0);\n}\n" >> $name
+}
+
+create_cheated_tests() {
+	local check_fold=$(ls | grep tests)
+	if [[ $check_fold != "tests" ]]; then
+		mkdir tests
+	fi
+	unit_tests_line="UNI\t=\t\$(find . -name 'my_strlen.c') tests/*.c"
+	check_fold=$(ls tests)
+	if [[ $check_fold != "" ]]; then
+		printf "The directory \"tests\" already contain a test, lazymake assumes that it is the cheated test\
+ ,if it's not then remove the content of the test folder and the root makefile and run lazymake again"
+		return 0
+	fi
+	cd tests && i_hope_you_will_not_get_busted && cd ..
+}
+##########
 
 create_lib_makefile() {
 	local dir=${PWD##*/}
