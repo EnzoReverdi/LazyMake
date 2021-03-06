@@ -34,23 +34,21 @@
 # If set to 1, I suggest you to set SILENCED to 1.
 COLOR=0
 
-# Will silence all the line of your Makefile with a '@' before each line if set to 1,
+# Will silence your Makefile if set to 1,
 # Base is 0.
 # If you set COLOR to 1, I suggest you to set SILENCED to 1.
 SILENCED=0
 
 # Will define the name of folders, base they are 3 letters , but change it the
 # way you want, keep in mind that if you wanna use lazymake on existing project, you
-# will have to match the folder name with the standars written there, or modify it.
+# will have to match the folder name with the standar written here.
 LIBRARY="lib"
 INCLUDE="inc"
 SOURCES="src"
 
-# If set to 1, it will init your project with all you need to start working directly
-# if your folder is empty, to init he need to know the location of your template
-# You need to specify it in the var PATH_TO_TEMPLATE, Your template folder should only
-# contain your libs , since it's gonna be copied to the lib folder.
-# Example: /home/enzoreverdi/Delivery/perso/Template
+# If set to 1, Will init an empty repository after running a simple lazymake,
+# init consist of copying the content of your template, create a src and tests folders
+# and create all the makefile you need.
 # What you want your template folder to look like
 # .
 # ├── inc
@@ -70,13 +68,14 @@ SOURCES="src"
 #         ├── my_strncmp.c
 #         └── my_strncpy.c
 INIT_IF_EMPTY=0
+## ABSOLUTE PATH NEEDED
 PATH_TO_TEMPLATE="/home/enzoreverdi/Delivery/perso/Template"
 
 # If you want to add another lib than "my" add it here.
 # example:
 #       your lib is named "libbestlib.a" , you need to add the flag "-lbestlib"
 # Do not add CSFML or Ncurse here , because it's already handled by command line
-# arguments. run "lazymake -h" to know more
+# arguments. 1 for CSFML, 2 for Ncurse
 LIB_ARG="-L./${LIBRARY} -lmy"
 
 # If you want to add flags to your compilation add it here.
