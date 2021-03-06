@@ -306,7 +306,7 @@ create_main_lib_makefile() {
 			continue
 		fi
 		cd $FIND_BUFFERS && create_lib_makefile && cd ..
-		buffertucoco="${FIND_BUFFERS}/Makefile"
+		buffertucoco="${FIND_BUFFERS}"
 		LEN=$((${#buffertucoco} + 2))
 		if [[ $LEN -gt $MAX_LEN ]]
 		then
@@ -319,7 +319,7 @@ create_main_lib_makefile() {
 		if [[ $FIND_BUFFERS = "." ]]; then
 			continue
 		fi
-		buffertucoco="${FIND_BUFFERS}/Makefile"
+		buffertucoco="${FIND_BUFFERS}"
 		LEN=${#buffertucoco}
 		NB_SPACE=$((${MAX_LEN} - ${LEN}))
 		if [[ $IDX -eq 0 ]]
